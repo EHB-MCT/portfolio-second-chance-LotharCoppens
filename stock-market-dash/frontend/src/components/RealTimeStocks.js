@@ -12,7 +12,7 @@ const RealTimeStocks = () => {
   };
 
   const fetchStockData = () => {
-    // Replace 'YOUR_API_KEY' with your actual Alpha Vantage API key
+    // Replace with your Alpha Vantage API key (API Key usage with limit so could show no data)
     const apiKey = 'TSQT8M1RTVEYZ4YH';
 
     // Fetch real-time stock data from the Alpha Vantage API for the last 24 hours
