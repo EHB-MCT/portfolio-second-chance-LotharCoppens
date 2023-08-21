@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Paper, Typography, List, ListItem, ListItemText, TextField, Button } from '@mui/material';
+import { Paper, Typography, TextField, Button } from '@mui/material';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const RealTimeStocks = () => {
   const [realTimeData, setRealTimeData] = useState([]);
@@ -12,22 +13,21 @@ const RealTimeStocks = () => {
 
   const fetchStockData = () => {
     // Replace 'YOUR_API_KEY' with your actual Alpha Vantage API key
-    const apiKey = 'QQ0OM443G5VF3246';
+    const apiKey = 'Q0OM443G5VF3246';
 
-    // Fetch real-time stock data from the Alpha Vantage API for the latest 30 minutes
+    // Fetch real-time stock data from the Alpha Vantage API for the last 24 hours
     axios
       .get(
-        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=${apiKey}`
+        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=60min&apikey=${apiKey}`
       )
       .then(response => {
-        const timeSeries = response.data['Time Series (1min)'];
+        const timeSeries = response.data['Time Series (60min)'];
 
         if (timeSeries) {
-          // Convert the fetched data into an array of objects for the latest 10 minutes
-          const timestamps = Object.keys(timeSeries).slice(0, 10); // Get the latest 10 timestamps
+          const timestamps = Object.keys(timeSeries); // Get all timestamps in the last 24 hours
           const stockData = timestamps.map(timestamp => ({
             timestamp,
-            price: timeSeries[timestamp]['1. open'],
+            price: parseFloat(timeSeries[timestamp]['1. open']), // Convert price to a number
           }));
 
           setRealTimeData(stockData);
@@ -42,27 +42,37 @@ const RealTimeStocks = () => {
   };
 
   return (
-    <Paper elevation={3} style={{ padding: '20px' }}>
-      <Typography variant="h5">Real-Time Stock Prices</Typography>
+    <Paper elevation={3} sx={{ p: 3 }}>
+      <Typography variant="h5" gutterBottom>
+        Real-Time Stock Prices (Last 24 Hours)
+      </Typography>
       <TextField
         label="Enter Stock Symbol"
         value={symbol}
         onChange={handleSymbolChange}
-        style={{ marginTop: '10px', marginBottom: '10px' }}
+        fullWidth
+        variant="outlined"
+        sx={{ my: 2 }}
       />
       <Button variant="contained" onClick={fetchStockData}>
         Watch Stock
       </Button>
-      <List>
-        {realTimeData.map((stock, index) => (
-          <ListItem key={index}>
-            <ListItemText
-              primary={`${stock.timestamp}:`}
-              secondary={`$${stock.price}`}
-            />
-          </ListItem>
-        ))}
-      </List>
+      {realTimeData.length > 0 && (
+        <LineChart width={800} height={400} data={realTimeData}>
+          <XAxis
+            dataKey="timestamp"
+            interval="preserveStartEnd" // Show first and last timestamp
+            tickCount={6} // Show a maximum of 6 ticks on the X-axis
+          />
+          <YAxis
+            domain={['dataMin', 'dataMax']} // Set a custom range for the Y-axis
+          />
+          <CartesianGrid strokeDasharray="3 3" />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="price" stroke="#8884d8" />
+        </LineChart>
+      )}
     </Paper>
   );
 };
