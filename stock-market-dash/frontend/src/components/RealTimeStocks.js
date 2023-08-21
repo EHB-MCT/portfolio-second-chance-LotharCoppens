@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Paper, Typography, TextField, Button } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Dot } from 'recharts';
 
 const RealTimeStocks = () => {
   const [realTimeData, setRealTimeData] = useState([]);
@@ -13,7 +13,7 @@ const RealTimeStocks = () => {
 
   const fetchStockData = () => {
     // Replace 'YOUR_API_KEY' with your actual Alpha Vantage API key
-    const apiKey = 'Q0OM443G5VF3246';
+    const apiKey = 'TSQT8M1RTVEYZ4YH';
 
     // Fetch real-time stock data from the Alpha Vantage API for the last 24 hours
     axios
@@ -70,7 +70,18 @@ const RealTimeStocks = () => {
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="price" stroke="#8884d8" />
+          <Line
+            type="monotone"
+            dataKey="price"
+            stroke="#8884d8"
+          >
+            <Dot
+              stroke={({ payload, index }) => (
+                payload.price >= (index > 0 ? realTimeData[index - 1].price : 0) ? 'green' : 'red'
+              )}
+              strokeWidth={2}
+            />
+          </Line>
         </LineChart>
       )}
     </Paper>
